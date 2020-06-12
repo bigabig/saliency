@@ -1,2 +1,2 @@
-# saliency
-Implementation of a Encoder Decoder + GAN for saliency detection
+# Saliency
+Implementation of an encoder + decoder + gan model for saliency detection
