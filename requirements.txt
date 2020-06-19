@@ -10,3 +10,4 @@ python-dateutil==2.8.1
 six==1.14.0
 torch==1.5.0+cu92
 torchvision==0.6.0+cu92
+opencv-python

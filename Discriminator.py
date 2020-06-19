@@ -40,7 +40,7 @@ class Discriminator(nn.Module):
         xb = F.tanh(self.fc4(xb))
         xb = F.tanh(self.fc5(xb))
 
-        # xb = self.fc6(xb)
-        xb = F.sigmoid(self.fc6(xb))
+        xb = self.fc6(xb)
+        # xb = F.sigmoid(self.fc6(xb))
 
         return xb

@@ -1,6 +1,9 @@
 /vgg16/*
-/model/*
+/model*/*
 /dataset/*
+/dataset_combined/*
+/dataset_salicon/*
+/salicon/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij+iml,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij+iml,python
