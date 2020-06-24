@@ -1,9 +1,9 @@
 /vgg16/*
 /model*/*
-/dataset/*
-/dataset_combined/*
-/dataset_salicon/*
-/salicon/*
+/out*/*
+/dataset*/*
+/runs*/*
+/salicon/
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij+iml,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij+iml,python
@@ -58,7 +58,7 @@ cmake-build-*/
 *.iws
 
 # IntelliJ
-out/
+out_firsttry/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

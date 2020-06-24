@@ -1,43 +1,46 @@
+import os
 import imageio
-import torchvision
 import torch
 from Discriminator import Discriminator
-from FixationDataset import FixationDataset
 from Generator import Generator
-from Transformations import Rescale, ToTensor, Normalize
-from torch.utils.data import DataLoader
 import torch.nn.functional as F
+from train_helper import load_test_dataset
+
 
 # constants
 MODEL_PATH = './model/'
 OUT_PATH = './out/'
+
+if not os.path.exists(MODEL_PATH):
+    print(f"ERROR: Model directory {MODEL_PATH} does not exist!")
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
 # select correct device
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 # parameters
-load_epoch = 14  # <- specify if you want to start from a checkpoint
+load_epoch = 295  # <- specify if you want to start from a checkpoint
+load_final = True  # <- if this is set 'load_epoch' is ignored and instead the final model is loaded!
 batch_size = 32
 
 # load data
-composed = torchvision.transforms.Compose([Rescale(), ToTensor(), Normalize()])
-test_ds = FixationDataset('./dataset', './dataset/test_images.txt', './dataset/train_fixations.txt', composed, testing=True)
-test_dl = DataLoader(test_ds, batch_size=batch_size * 2, shuffle=True)
+test_dl = load_test_dataset('./dataset_debug', batch_size)
 
 # create the models & use pretrained weights
 generator = Generator(torch.load('./vgg16/vgg16-conv.pth')).to(device)
 discriminator = Discriminator().to(device)
 
 # load checkpoint
-if load_epoch > 0:
+if not load_final and load_epoch > 0:
     print('Loading model checkpoint...')
     checkpoint = torch.load(MODEL_PATH + "Generator_" + str(load_epoch) + ".pt")
     generator.load_state_dict(checkpoint['model_state_dict'])
-    start_epoch = checkpoint['epoch']
-
-print(f"Starting testing with checkpoint from epoch {start_epoch}!")
-
+elif load_final:
+    print('Loading final model...')
+    checkpoint = torch.load(MODEL_PATH + "Generator_final.pt")
+    generator.load_state_dict(checkpoint['model_state_dict'])
 
 generator.eval()
 with torch.no_grad():
