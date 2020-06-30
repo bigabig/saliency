@@ -7,7 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 # constants
 MODEL_PATH = './model/'
-EXPERIMENT_NAME = 'generator_pretraining'
+EXPERIMENT_NAME = 'generator_pretraining_renamed'
 
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
@@ -18,17 +18,17 @@ print(device)
 
 # parameters
 learning_rate = 0.0003  # 0.001
-batch_size = 2  # We train the networks [...] using a batch size of 32.
+batch_size = 8  # We train the networks [...] using a batch size of 32.
 start_epoch = 0  # <- specify if you want to start from a checkpoint
 epochs = 100
 weight_decay = 0.0001  # Weight decay
-save_interval = 15  # save every save_interval epochs
+save_interval = 1  # save every save_interval epochs
 
 # init tensorboard
 writer = SummaryWriter('runs/'+EXPERIMENT_NAME)
 
 # load data
-train_dl, valid_dl = load_dataset('./dataset_debug', batch_size)
+train_dl, valid_dl = load_dataset('./dataset', batch_size)
 
 # create the models & use pretrained weights
 generator = Generator(torch.load('./vgg16/vgg16-conv.pth')).to(device)
@@ -37,10 +37,7 @@ generator = Generator(torch.load('./vgg16/vgg16-conv.pth')).to(device)
 freeze_generator_weights(generator)
 
 # init the optimizers
-# pass only the not frozen parameters
-# opt_generator = torch.optim.SGD(filter(lambda p: p.requires_grad, generator.parameters()), lr=learning_rate, momentum=0.9)
-opt_generator = torch.optim.Adagrad(filter(lambda p: p.requires_grad, generator.parameters()),
-                              lr=learning_rate, weight_decay=weight_decay)
+opt_generator = torch.optim.Adagrad(generator.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
 # BCE, which is computed with respect to the down-sampled output and ground truth saliency
 loss_function = BCELossWithDownsampling()
@@ -52,7 +49,8 @@ if start_epoch > 0:
     checkpoint = torch.load(MODEL_PATH + "Generator_pretraining" + str(start_epoch) + ".pt")
     generator.load_state_dict(checkpoint['model_state_dict'])
     opt_generator.load_state_dict(checkpoint['optimizer_state_dict'])
-    start_epoch = checkpoint['epoch']
+    if 'epoch' in checkpoint:
+        start_epoch = checkpoint['epoch']
 
 print(f"Starting training with epoch {start_epoch}!")
 
@@ -74,7 +72,7 @@ def training_loop():
         batch_img, batch_fixation = batch['image'].to(device), batch['fixation'].to(device)
 
         # train the generator
-        generator_pred = generator.forward(batch_img)
+        generator_pred = generator(batch_img)
         generator_loss = loss_function(generator_pred, batch_fixation)
 
         loss_sum_generator.append(generator_loss)
